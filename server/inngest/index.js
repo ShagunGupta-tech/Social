@@ -28,6 +28,7 @@ const syncUserCreation = inngest.createFunction(
 
       const created = await User.create(userData);
       console.log('syncUserCreation success', {id, username, created});
+   
     } catch (error) {
       console.error('syncUserCreation failed', error, event.data);
       throw error;
