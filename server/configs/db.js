@@ -10,12 +10,10 @@ const connectDB = async () => {
     const withoutDb = cleanedUrl.replace(/\/(test|social|admin|[a-zA-Z0-9_-]+)$/, "");
     const connectionString = `${withoutDb}/social`;
 
-    console.log("MongoDB connect URL:", connectionString);
+    
 
-    await mongoose.connect(connectionString, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(connectionString);
+
 
     console.log("MongoDB connected successfully");
   } catch (error) {
