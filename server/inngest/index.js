@@ -7,31 +7,33 @@ export const inngest = new Inngest({ id: "social" });
 
 //Inngest function to save user data to a database
 const syncUserCreation = inngest.createFunction(
-    {id: 'sync-user-from-clerk'},
-    {event:'clerk/user.created'},
-    async({event})=>{
+  {id: 'sync-user-from-clerk'},
+  {event:'clerk/user.created'},
+  async ({event}) => {
+    try {
+      await connectDB();
+      const {id, first_name, last_name, email_addresses, image_url} = event.data;
+      let username = email_addresses[0].email_address.split('@')[0];
 
-    await connectDB();   
-        const{id, first_name, last_name, email_addresses, image_url} = event.data
-        let username = email_addresses[0].email_address.split('@')[0]
+      const existing = await User.findOne({ username });
+      if (existing) username += Math.floor(Math.random() * 1000);
 
-        //Check availability of username in the databasse
-        const user = await User.findOne({username});
-         
-        if(user){
-            username = username + Math.floor(Math.random() * 1000)
-        }
+      const userData = {
+        _id: id,
+        email: email_addresses[0].email_address,
+        full_name: `${first_name} ${last_name}`,
+        profile_picture: image_url,
+        username,
+      };
 
-        const userData = {
-            _id: id,
-            email: email_addresses[0].email_address,
-            full_name: first_name + " " + last_name,
-            profile_picture: image_url,
-            username
-        }
-        await User.create(userData)
+      const created = await User.create(userData);
+      console.log('syncUserCreation success', {id, username, created});
+    } catch (error) {
+      console.error('syncUserCreation failed', error, event.data);
+      throw error;
     }
-)
+  }
+);
 
 
 //Inngest function to update user data to a database
